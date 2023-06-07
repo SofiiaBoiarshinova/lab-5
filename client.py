@@ -1,14 +1,29 @@
 import socket
 import pickle
+import cryptocode
 
 HOST = '127.0.0.1'
 PORT = 8080
 
 sock = socket.socket()
-sock.connect((HOST, PORT))
+sock.bind((HOST, PORT))
+sock.listen(1)
+conn, addr = sock.accept()
 
-p, g, a = 7, 5, 3
-A = g ** a % p
-sock.send(pickle.dumps((p, g, A)))
+p, g, A = pickle.loads(conn.recv(1024))
+b = 4
+B = g ** b % p
+conn.send(pickle.dumps(B))
 
-sock.close()
+K = A ** b % p
+key = str(K)
+msg = 'привет!'
+print('сообщение:', msg)
+
+msgEn = cryptocode.encrypt(msg, key)
+conn.send(pickle.dumps(msgEn))
+print('отправленное сообщение:', msgEn)
+
+conn.close()
+
+
